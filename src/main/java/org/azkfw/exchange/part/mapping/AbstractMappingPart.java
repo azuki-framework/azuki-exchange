@@ -28,15 +28,45 @@ import org.azkfw.exchange.part.AbstractExchangePart;
  */
 public abstract class AbstractMappingPart extends AbstractExchangePart implements MappingPart {
 
+	/**
+	 * コンストラクタ
+	 */
+	public AbstractMappingPart() {
+		super(MappingPart.class);
+	}
+
+	/**
+	 * コンストラクタ
+	 * 
+	 * @param aClass クラス
+	 */
+	public AbstractMappingPart(final Class<?> aClass) {
+		super(aClass);
+	}
+
+	/**
+	 * コンストラクタ
+	 * 
+	 * @param aName 名前
+	 */
+	public AbstractMappingPart(final String aName) {
+		super(aName);
+	}
+
 	@Override
-	public final MappingResult mapping(final Map<String, Object> aFromMap, final Map<String, Object> aToMap) {
+	public final MappingResult mapping(final Map<String, Object> aInputMap, final Map<String, Object> aOutputMap) {
 		MappingResult result = null;
-
-		result = doMapping(aFromMap, aToMap);
-
+		result = doMapping(aInputMap, aOutputMap);
 		return result;
 	}
 
-	protected abstract MappingResult doMapping(final Map<String, Object> aFromMap, final Map<String, Object> aToMap);
+	/**
+	 * マッピング処理を行なう。
+	 * 
+	 * @param aInputMap 入力マップ
+	 * @param aOutputMap 出力マップ
+	 * @return 結果
+	 */
+	protected abstract MappingResult doMapping(final Map<String, Object> aInputMap, final Map<String, Object> aOutputMap);
 
 }

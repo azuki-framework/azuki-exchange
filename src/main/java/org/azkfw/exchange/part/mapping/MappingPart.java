@@ -22,12 +22,21 @@ import java.util.Map;
 import org.azkfw.exchange.part.ExchangePart;
 
 /**
+ * このインターフェースは、マッピングパート機能を定義するインターフェースです。
+ * 
  * @since 1.0.0
  * @version 1.0.0 2014/07/14
  * @author Kawakicchi
  */
 public interface MappingPart extends ExchangePart {
 
-	public MappingResult mapping(final Map<String, Object> aFromMap, final Map<String, Object> aToMap);
+	/**
+	 * マッピング処理を行なう。
+	 * 
+	 * @param aInputMap 入力マップ
+	 * @param aOutputMap 出力マップ
+	 * @return 処理結果情報
+	 */
+	public MappingResult mapping(final Map<String, Object> aInputMap, final Map<String, Object> aOutputMap);
 
 }

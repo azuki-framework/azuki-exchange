@@ -18,22 +18,35 @@
 package org.azkfw.exchange.part.input;
 
 /**
+ * このクラスは、入力処理結果情報を保持するクラスです。
+ * 
  * @since 1.0.0
  * @version 1.0.0 2014/07/14
  * @author Kawakicchi
  */
 public class InputResult {
 
-	public static final InputResult Continue = new InputResult(false, false);
-	public static final InputResult Skip = new InputResult(false, true);
-	public static final InputResult End = new InputResult(true, false);
+	public static final InputResult Continue = new InputResult(true, false, false);
+	public static final InputResult Skip = new InputResult(true, false, true);
+	public static final InputResult End = new InputResult(true, true, false);
+	public static final InputResult Error = new InputResult(false, true, false);
 
+	private boolean result;
 	private boolean endFlag;
 	private boolean skipFlag;
 
-	private InputResult(final boolean aEnd, final boolean aSkip) {
+	private InputResult(final boolean aResult, final boolean aEnd, final boolean aSkip) {
+		result = aResult;
 		endFlag = aEnd;
 		skipFlag = aSkip;
+	}
+
+	/**
+	 * 処理結果を判定する。
+	 * @return 判定結果
+	 */
+	public boolean isResult() {
+		return result;
 	}
 
 	public boolean isEnd() {

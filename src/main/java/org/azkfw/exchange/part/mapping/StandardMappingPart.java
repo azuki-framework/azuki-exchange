@@ -17,6 +17,7 @@
  */
 package org.azkfw.exchange.part.mapping;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,7 +29,25 @@ import java.util.Map;
  */
 public final class StandardMappingPart extends AbstractMappingPart {
 
-	private Map<String, String> outInputKeyMap;
+	private Map<String, String> outputInputKeyMap;
+
+	/**
+	 * コンストラクタ
+	 */
+	public StandardMappingPart() {
+		super(StandardMappingPart.class);
+		outputInputKeyMap = new HashMap<String, String>();
+	}
+
+	/**
+	 * マッピングキーを追加する。
+	 * 
+	 * @param aInputKey 入力キー
+	 * @param aOutputKey 出力キー
+	 */
+	public void addMappingKey(final String aInputKey, final String aOutputKey) {
+		outputInputKeyMap.put(aOutputKey, aInputKey);
+	}
 
 	@Override
 	public void doInitialize() {
@@ -41,21 +60,19 @@ public final class StandardMappingPart extends AbstractMappingPart {
 	}
 
 	@Override
-	protected MappingResult doMapping(final Map<String, Object> aFromMap, final Map<String, Object> aToMap) {
+	protected MappingResult doMapping(final Map<String, Object> aInputMap, final Map<String, Object> aOutputMap) {
 
-		for (String key : outInputKeyMap.keySet()) {
-			String toKey = key;
-			String fromKey = outInputKeyMap.get(toKey);
+		for (String key : outputInputKeyMap.keySet()) {
+			String outputKey = key;
+			String inputKey = outputInputKeyMap.get(outputKey);
 
-			if (aFromMap.containsKey(fromKey)) {
-				Object value = aFromMap.get(fromKey);
-
-				aToMap.put(toKey, value);
+			if (aInputMap.containsKey(inputKey)) {
+				Object value = aInputMap.get(inputKey);
+				aOutputMap.put(outputKey, value);
 			} else {
 				return MappingResult.Error;
 			}
 		}
-
 		return MappingResult.Success;
 	}
 

@@ -17,7 +17,10 @@
  */
 package org.azkfw.exchange.exchange;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,10 +70,31 @@ public class CsvExchange extends AbstractExchange<CsvInputPart, CsvOutputPart> {
 
 	public final class CsvInputPart extends AbstractInputPart {
 
+		private File inputFile;
 		private CsvBufferedReader reader;
+		private Map<String, Integer> mapping;
+
+		private boolean headerFlag;
+		private boolean headerKeyFlag;
+		private long countLine;
 
 		private CsvInputPart() {
+			headerFlag = false;
+			headerKeyFlag = false;
 
+			mapping = new HashMap<String, Integer>();
+		}
+
+		public void setInputFile(final File aFile) {
+			inputFile = aFile;
+		}
+
+		public void setHeaderFlag(final boolean aFlag) {
+			headerFlag = aFlag;
+		}
+
+		public void setHeaderKeyFlag(final boolean aFlag) {
+			headerKeyFlag = aFlag;
 		}
 
 		@Override
@@ -84,7 +108,8 @@ public class CsvExchange extends AbstractExchange<CsvInputPart, CsvOutputPart> {
 
 		@Override
 		public void doOpen() throws IOException {
-			reader = new CsvBufferedReader("test1.csv");
+			reader = new CsvBufferedReader(inputFile);
+			countLine = 0;
 		}
 
 		@Override
@@ -104,8 +129,23 @@ public class CsvExchange extends AbstractExchange<CsvInputPart, CsvOutputPart> {
 		protected InputResult doRead(final Map<String, Object> aMap) throws IOException {
 			List<String> line = reader.readCsvLine();
 			if (null != line) {
-
-				return InputResult.Continue;
+				if (0 == countLine && headerFlag) {
+					if (headerKeyFlag) {
+						mapping.clear();
+						for (int i = 0; i < line.size(); i++) {
+							mapping.put(line.get(i), i + 1);
+						}
+					}
+					countLine++;
+					return InputResult.Skip;
+				} else {
+					for (String key : mapping.keySet()) {
+						int index = mapping.get(key) - 1;
+						aMap.put(key, line.get(index));
+					}
+					countLine++;
+					return InputResult.Continue;
+				}
 			} else {
 				return InputResult.End;
 			}
@@ -115,10 +155,27 @@ public class CsvExchange extends AbstractExchange<CsvInputPart, CsvOutputPart> {
 
 	public final class CsvOutputPart extends AbstractOutputPart {
 
+		private File outputFile;
 		private CsvBufferedWriter writer;
+		private Map<Integer, String> mapping;
+
+		private boolean headerFlag;
 
 		private CsvOutputPart() {
+			mapping = new HashMap<Integer, String>();
+			headerFlag = false;
+		}
 
+		public void setOutputFile(final File aFile) {
+			outputFile = aFile;
+		}
+
+		public void setHeader(final boolean aFlag) {
+			headerFlag = aFlag;
+		}
+
+		public void addMappingKey(final int aIndex, final String aName) {
+			mapping.put(aIndex, aName);
 		}
 
 		@Override
@@ -133,7 +190,20 @@ public class CsvExchange extends AbstractExchange<CsvInputPart, CsvOutputPart> {
 
 		@Override
 		public void doOpen() throws IOException {
-			writer = new CsvBufferedWriter("test2.csv");
+			writer = new CsvBufferedWriter(outputFile);
+
+			if (headerFlag) {
+				List<String> buf = new ArrayList<String>();
+				int index = 1;
+				while (true) {
+					if (!mapping.containsKey(index)) {
+						break;
+					}
+					buf.add(mapping.get(index));
+					index++;
+				}
+				writer.writeCsvLine(buf);
+			}
 		}
 
 		@Override
@@ -150,7 +220,22 @@ public class CsvExchange extends AbstractExchange<CsvInputPart, CsvOutputPart> {
 		}
 
 		@Override
-		public OutputResult doWrite(final Map<String, Object> aMap) {
+		public OutputResult doWrite(final Map<String, Object> aMap) throws IOException {
+
+			List<String> buf = new ArrayList<String>();
+			int index = 1;
+			while (true) {
+				if (!mapping.containsKey(index)) {
+					break;
+				}
+				String key = mapping.get(index);
+
+				Object value = aMap.get(key);
+				buf.add(value.toString());
+
+				index++;
+			}
+			writer.writeCsvLine(buf);
 
 			return OutputResult.Success;
 		}

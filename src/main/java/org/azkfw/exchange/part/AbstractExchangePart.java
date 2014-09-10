@@ -17,6 +17,8 @@
  */
 package org.azkfw.exchange.part;
 
+import org.azkfw.lang.LoggingObject;
+
 /**
  * このクラスは、パートを定義するするための基底クラスです。
  * 
@@ -24,7 +26,32 @@ package org.azkfw.exchange.part;
  * @version 1.0.0 2014/07/14
  * @author Kawakicchi
  */
-public abstract class AbstractExchangePart implements ExchangePart {
+public abstract class AbstractExchangePart extends LoggingObject implements ExchangePart {
+
+	/**
+	 * コンストラクタ
+	 */
+	public AbstractExchangePart() {
+		super(ExchangePart.class);
+	}
+
+	/**
+	 * コンストラクタ
+	 * 
+	 * @param aClass クラス
+	 */
+	public AbstractExchangePart(final Class<?> aClass) {
+		super(aClass);
+	}
+
+	/**
+	 * コンストラクタ
+	 * 
+	 * @param aName 名前
+	 */
+	public AbstractExchangePart(final String aName) {
+		super(aName);
+	}
 
 	@Override
 	public void initialize() {

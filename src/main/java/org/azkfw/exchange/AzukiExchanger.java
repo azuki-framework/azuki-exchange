@@ -17,14 +17,19 @@
  */
 package org.azkfw.exchange;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.azkfw.exchange.exchange.CsvExchange;
+import org.azkfw.exchange.exchange.CsvExchange.CsvInputPart;
+import org.azkfw.exchange.exchange.CsvExchange.CsvOutputPart;
 import org.azkfw.exchange.part.input.InputPart;
 import org.azkfw.exchange.part.input.InputResult;
 import org.azkfw.exchange.part.mapping.MappingPart;
 import org.azkfw.exchange.part.mapping.MappingResult;
+import org.azkfw.exchange.part.mapping.StandardMappingPart;
 import org.azkfw.exchange.part.output.OutputPart;
 import org.azkfw.exchange.part.output.OutputResult;
 
@@ -39,12 +44,39 @@ public final class AzukiExchanger {
 
 	public static void main(final String[] args) {
 
+		CsvExchange exchange = new CsvExchange();
+
+		CsvInputPart input = exchange.generateInputPart();
+		input.setInputFile(new File("/Users/Kawakicchi/temp/input.csv"));
+		input.setHeaderFlag(true);
+		input.setHeaderKeyFlag(true);
+
+		CsvOutputPart output = exchange.generateOutputPart();
+		output.setOutputFile(new File("/Users/Kawakicchi/temp/output.csv"));
+		output.setHeader(true);
+		output.addMappingKey(1, "AGE");
+		output.addMappingKey(2, "NAME");
+
+		StandardMappingPart mapping = new StandardMappingPart();
+		mapping.addMappingKey("NAME", "NAME");
+		mapping.addMappingKey("AGE", "AGE");
+
+		AzukiExchanger exchanger = new AzukiExchanger(input, output, mapping);
+		exchanger.exchange();
 	}
 
-	public void exchange() {
-		InputPart input = null;
-		OutputPart output = null;
-		MappingPart mapping = null;
+	private InputPart input = null;
+	private OutputPart output = null;
+	private MappingPart mapping = null;
+
+	public AzukiExchanger(final InputPart aInputPart, final OutputPart aOutputPart, final MappingPart aMappingPart) {
+		input = aInputPart;
+		output = aOutputPart;
+		mapping = aMappingPart;
+	}
+
+	public boolean exchange() {
+		boolean result = false;
 
 		try {
 			input.initialize();
@@ -57,7 +89,11 @@ public final class AzukiExchanger {
 			while (true) {
 				Map<String, Object> inputMap = new HashMap<String, Object>();
 				InputResult rstInput = input.read(inputMap);
+				if (false == rstInput.isResult()) {
+					break;
+				}
 				if (rstInput.isEnd()) {
+					result = true;
 					break;
 				}
 				if (rstInput.isSkip()) {
@@ -109,6 +145,7 @@ public final class AzukiExchanger {
 			input = null;
 		}
 
+		return result;
 	}
 
 }

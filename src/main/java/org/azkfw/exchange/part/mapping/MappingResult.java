@@ -18,6 +18,8 @@
 package org.azkfw.exchange.part.mapping;
 
 /**
+ * このクラスは、マッピング処理結果情報を保持するクラスです。
+ * 
  * @since 1.0.0
  * @version 1.0.0 2014/07/14
  * @author Kawakicchi
@@ -33,6 +35,11 @@ public class MappingResult {
 		result = aResult;
 	}
 
+	/**
+	 * 処理結果を判定する。
+	 * 
+	 * @return 判定結果
+	 */
 	public boolean isResult() {
 		return result;
 	}
